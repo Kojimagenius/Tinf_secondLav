@@ -69,6 +69,57 @@ def haffman(message, alph):
     print("Расодированное сообщение " + message)
 
 
+def float_to_binary(num):#перевол в бинарное число
+    exponent=0
+    shifted_num=num
+    while shifted_num != int(shifted_num):
+        shifted_num*=2
+        exponent+=1
+    if exponent==0:
+        return '{0:0b}'.format(int(shifted_num))
+    binary='{0:0{1}b}'.format(int(shifted_num),exponent+1)
+    integer_part=binary[:-exponent]
+    fractional_part=binary[-exponent:].rstrip('0')
+    return '{0}.{1}'.format(integer_part,fractional_part)
+
+
+def kod_Gilbert_Mour (p):
+    b = []
+    l = []
+    b.append(float(p[0])/2)
+    for i in range(1,len(p)):
+        b.append(b[i-1]+p[i-1]/2+p[i]/2)
+    for i in range(len(p)):
+        b[i]=((float)(float_to_binary(b[i])))
+        l.append(str(math.trunc(b[i]*math.pow(10,2+math.ceil(math.log(1/p[i]))))))
+    return (l)
+
+
+def Gilbert_mour(message, alph):
+    symbols = []
+    prob_array=[]
+    for char, prob in alph:
+        prob_array.append(float(prob))
+    codes = kod_Gilbert_Mour(prob_array)
+    codes[0] = "00"
+    for i in range(len(alph)):
+        alph[i].append(codes[i])
+    print(alph)         #На этом этапе имеем сформированный словарь
+    for char_m in message:
+        for char_a, prob, code in alph:
+            if char_m == char_a:
+                message = message.replace(char_m, code)
+    print("Кодированное сообщение " + message)
+    res = ''
+    while message:
+        for char, prob, code in alph:
+            if message.startswith(code):
+                res += char
+                message = message[len(code):]
+    message = res
+    print("Раскодированное сообщение " +message)
+
+
 def bit_parser_shennon(qum, dlina):          #Функция, возвращающая двоичное представление вероятности
     if dlina == 0: dlina += 1
     if dlina == 2: dlina += 1
@@ -125,5 +176,4 @@ with open('alphabet.txt', 'r') as f_alph:
         alphabet.append(line.split())
     f_alph.close()
 mes = open("input.txt").readline()
-shennon(mes, alphabet)
-
+Gilbert_mour(mes, alphabet)
